@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Synthetica · AI World Generation</title>
+    <meta name="description" content="Generate interactive 3D worlds in real-time using AI. 128× compression, WebSocket streaming, and 11 FPS performance." />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+    <div class="container">
+        <a href="index.html" class="logo"><i class="fas fa-cube"></i> SYNTHETICA</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="contact.html">Contact</a>
+            <div class="websocket-badge" id="wsBadge">
+                <i class="fas fa-circle"></i>
+                <span>WebSocket</span>
+                <span class="status live">LIVE</span>
+            </div>
+            <a href="dashboard.html" class="btn btn-primary btn-sm">
+                <i class="fas fa-rocket"></i> Launch App
+            </a>
+        </div>
+        <div class="hamburger" id="hamburger">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+</nav>
+
+<section class="hero" id="hero">
+    <div class="container">
+        <div class="hero-grid">
+            <div class="hero-content">
+                <div class="badge"><i class="fas fa-bolt"></i> NEXT-GEN AI WORLD GENERATION</div>
+                <h1>Generate<br /><span class="gradient-text">Interactive</span><br />Worlds in<br /><span class="gradient-text">Real Time</span></h1>
+                <div class="hero-status">
+                    <div class="status-indicator">
+                        <i class="fas fa-circle"></i>
+                        <span>WebSocket Connection</span>
+                        <span class="status-badge live">LIVE</span>
+                    </div>
+                </div>
+                <p class="hero-desc">
+                    Synthetica uses advanced AI to generate, compress and stream fully interactive 3D worlds in real-time.
+                    <span class="highlight">128× compression</span> · <span class="highlight">19.1× faster</span> · <span class="highlight">11 FPS</span>
+                </p>
+                <div class="hero-actions">
+                    <a href="dashboard.html" class="btn btn-primary btn-lg"><i class="fas fa-play"></i> Start Creating</a>
+                    <a href="#features" class="btn btn-outline btn-lg"><i class="fas fa-video"></i> See Features</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="demo-window">
+                    <div class="demo-header">
+                        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                        <span class="demo-title">LIVE WORLD DEMO</span>
+                        <span class="demo-badge"><i class="fas fa-circle"></i> 11 FPS</span>
+                        <span class="demo-badge"><i class="fas fa-expand"></i> 1920×1080</span>
+                    </div>
+                    <div class="demo-content">
+                        <div class="world-preview">
+                            <div class="preview-scene" id="previewScene">
+                                <div class="world-overlay">
+                                    <div class="world-info">
+                                        <span class="world-name" id="worldName">Tokyo_2077</span>
+                                        <span class="world-controls">
+                                            <i class="fas fa-arrows-alt" title="Pan"></i>
+                                            <i class="fas fa-rotate" title="Rotate"></i>
+                                            <i class="fas fa-search-plus" title="Zoom"></i>
+                                        </span>
+                                    </div>
+                                    <div class="world-tags" id="worldTags">
+                                        <span class="tag">Cyberpunk</span><span class="tag">Neon</span>
+                                        <span class="tag">Rain</span><span class="tag">Holographic</span>
+                                    </div>
+                                    <div class="world-actions">
+                                        <button class="world-btn" onclick="generateWorld()"><i class="fas fa-sync-alt"></i> Regenerate World</button>
+                                    </div>
+                                    <div class="world-watermark">
+                                        <span>Floating Islands</span><span>AI Cityscape</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="preview-overlay"><span class="live-badge"><i class="fas fa-circle"></i> LIVE</span></div>
+                            <div class="generation-progress"><div class="bar" id="progressBar"></div></div>
+                            <div class="generation-stage" id="generationStage">🧠 Generating...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="stats" id="stats">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" data-count="128">0</div>
+                <span class="stat-label">× Compression</span>
+                <p class="stat-desc">Smaller files, bigger possibilities</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-count="19.1">0</div>
+                <span class="stat-label">× Faster Generation</span>
+                <p class="stat-desc">Unprecedented real-time speed</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" data-count="11">0</div>
+                <span class="stat-label">FPS Live Performance</span>
+                <p class="stat-desc">Smooth interactive streaming</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features" id="features">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Features</span>
+            <h2>Built for the Future of <span class="gradient-text">Interactive Worlds</span></h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>AI-Powered Generation</h3>
+                <p>State-of-the-art models create rich 3D worlds from simple text prompts.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Real-Time Streaming</h3>
+                <p>WebSocket-powered delivery at 11 FPS for instant interaction.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-compress-arrows-alt"></i></div>
+                <h3>128× Compression</h3>
+                <p>19.1× faster inference with no quality loss.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-code"></i></div>
+                <h3>Developer First</h3>
+                <p>Simple APIs, SDK, and docs for seamless integration.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pricing" id="pricing">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Pricing</span>
+            <h2>Start Building <span class="gradient-text">For Free</span></h2>
+        </div>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="pricing-header"><h4>Free</h4><p>Explore & create</p></div>
+                <div class="pricing-price">$0 <span>/ month</span></div>
+                <ul>
+                    <li><i class="fas fa-check"></i> 4 worlds/month</li>
+                    <li><i class="fas fa-check"></i> Text prompts</li>
+                    <li><i class="fas fa-check"></i> 60s exploration</li>
+                    <li><i class="fas fa-xmark"></i> No export</li>
+                </ul>
+                <a href="dashboard.html" class="btn btn-outline">Get Started</a>
+            </div>
+            <div class="pricing-card popular">
+                <div class="popular-badge">Most Popular</div>
+                <div class="pricing-header"><h4>Pro</h4><p>For serious creators</p></div>
+                <div class="pricing-price">$20 <span>/ month</span></div>
+                <ul>
+                    <li><i class="fas fa-check"></i> 25 worlds/month</li>
+                    <li><i class="fas fa-check"></i> Image + 3D upload</li>
+                    <li><i class="fas fa-check"></i> 5 min exploration</li>
+                    <li><i class="fas fa-check"></i> Unity export</li>
+                </ul>
+                <a href="dashboard.html" class="btn btn-primary">Start Pro</a>
+            </div>
+            <div class="pricing-card">
+                <div class="pricing-header"><h4>Studio</h4><p>For teams</p></div>
+                <div class="pricing-price">$95 <span>/ month</span></div>
+                <ul>
+                    <li><i class="fas fa-check"></i> 75 worlds/month</li>
+                    <li><i class="fas fa-check"></i> Full 3D editing</li>
+                    <li><i class="fas fa-check"></i> Unlimited exploration</li>
+                    <li><i class="fas fa-check"></i> All exports</li>
+                </ul>
+                <a href="contact.html" class="btn btn-outline">Contact Sales</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="showcase" id="showcase">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Showcase</span>
+            <h2>Explore <span class="gradient-text">Generated Worlds</span></h2>
+        </div>
+        <div class="gallery">
+            <div class="gallery-item"><div class="gallery-thumb" style="background:linear-gradient(135deg,#6C5CE7,#00D2D3);"></div><div class="gallery-overlay"><p>Cyberpunk Tokyo</p><span>2.3s generation</span></div></div>
+            <div class="gallery-item"><div class="gallery-thumb" style="background:linear-gradient(135deg,#00D2D3,#4DFFFF);"></div><div class="gallery-overlay"><p>Mystical Forest</p><span>1.8s generation</span></div></div>
+            <div class="gallery-item"><div class="gallery-thumb" style="background:linear-gradient(135deg,#FF6B6B,#FFB84D);"></div><div class="gallery-overlay"><p>Space Station</p><span>3.1s generation</span></div></div>
+            <div class="gallery-item"><div class="gallery-thumb" style="background:linear-gradient(135deg,#6C5CE7,#FF6B6B);"></div><div class="gallery-overlay"><p>Ancient Ruins</p><span>2.7s generation</span></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <div class="cta-box">
+            <h2>Ready to Build <span class="gradient-text">Interactive Worlds?</span></h2>
+            <p>Join the next generation of world builders.</p>
+            <form id="subscribeForm">
+                <input type="email" placeholder="Enter your email" required />
+                <button type="submit" class="btn btn-primary"><i class="fas fa-arrow-right"></i> Get Early Access</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="index.html" class="logo"><i class="fas fa-cube"></i> SYNTHETICA</a>
+                <p>AI World Generation Platform</p>
+            </div>
+            <div class="footer-links"><h5>Product</h5><a href="index.html#features">Features</a><a href="index.html#pricing">Pricing</a></div>
+            <div class="footer-links"><h5>Company</h5><a href="about.html">About</a><a href="contact.html">Contact</a></div>
+            <div class="footer-links"><h5>Support</h5><a href="contact.html">API</a><a href="contact.html">Docs</a></div>
+        </div>
+        <div class="footer-bottom"><p>&copy; 2026 Synthetica. Built with 128× compression.</p></div>
+    </div>
+</footer>
+
+<script src="static/js/main.js"></script>
+<script src="static/js/websocket.js"></script>
+<script src="static/js/world_controls.js"></script>
+</body>
+</html>
