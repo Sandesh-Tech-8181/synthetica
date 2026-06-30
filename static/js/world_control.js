@@ -1,5 +1,5 @@
 // ============================================
-// SYNTHETICA — World Controls (FIXED)
+// SYNTHETICA 3.0 — World Controls
 // ============================================
 
 const WORLD_THEMES = [
@@ -11,66 +11,40 @@ const WORLD_THEMES = [
     { name: 'Neo York 2150', tags: ['Urban', 'Neon', 'Futuristic', 'Cyber'] },
     { name: 'Mumbai Neon', tags: ['India', 'Neon', 'Cyberpunk', 'Chaos'] },
     { name: 'Quantum Garden', tags: ['Quantum', 'Nature', 'Glow', 'Surreal'] },
+    { name: 'Berlin_Prime', tags: ['Europe', 'Cyber', 'Digital', 'Neon'] },
+    { name: 'Bangkok_2077', tags: ['Asia', 'Neon', 'Rain', 'Holographic'] },
 ];
 
 let currentWorldIndex = 0;
 let isGenerating = false;
 
-// Make sure function is globally accessible
 window.generateWorld = function() {
-    console.log('🔄 generateWorld() called!');
-    
-    if (isGenerating) {
-        console.log('⏳ Already generating...');
-        return;
-    }
+    if (isGenerating) return;
     isGenerating = true;
 
     const btn = document.querySelector('.world-btn');
-    if (!btn) {
-        console.log('❌ Button not found!');
-        isGenerating = false;
-        return;
-    }
+    if (!btn) return;
 
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
     btn.disabled = true;
-    console.log('🎯 Generating new world...');
-
-    // Update progress
-    const bar = document.getElementById('progressBar');
-    if (bar) bar.style.width = '20%';
-
-    const stageEl = document.getElementById('generationStage');
-    if (stageEl) {
-        stageEl.textContent = '🧠 Generating...';
-        stageEl.style.display = 'block';
-    }
 
     setTimeout(function() {
-        // Select next world
         currentWorldIndex = (currentWorldIndex + 1) % WORLD_THEMES.length;
         const world = WORLD_THEMES[currentWorldIndex];
-        console.log('🌍 Selected world:', world.name);
 
-        // Update world name
+        // Update UI
         const worldName = document.querySelector('.world-name');
-        if (worldName) {
-            worldName.textContent = world.name;
-            console.log('✅ Name updated:', world.name);
-        }
+        if (worldName) worldName.textContent = world.name;
 
-        // Update tags
         const tagsContainer = document.querySelector('.world-tags');
         if (tagsContainer) {
             tagsContainer.innerHTML = world.tags.map(function(tag) {
                 return '<span class="tag">' + tag + '</span>';
             }).join('');
-            console.log('✅ Tags updated:', world.tags);
         }
 
-        // Update scene background
+        // Update background with gradient
         const scene = document.getElementById('previewScene');
         if (scene) {
             const gradients = [
@@ -83,41 +57,20 @@ window.generateWorld = function() {
             scene.style.transition = 'background 0.5s ease';
         }
 
-        // Update watermark
-        const watermark = document.querySelector('.world-watermark');
-        if (watermark) {
-            const elements = world.tags.slice(0, 2);
-            watermark.innerHTML = elements.map(function(el) {
-                return '<span>' + el + '</span>';
-            }).join('');
+        // Send to WebSocket if connected
+        if (ws && ws.isConnected) {
+            ws.sendPrompt(world.name, { style: world.tags[0].toLowerCase() });
         }
 
-        // Update progress
-        if (bar) {
-            bar.style.width = '100%';
-            setTimeout(function() {
-                bar.style.width = '0%';
-            }, 1500);
-        }
-
-        if (stageEl) {
-            stageEl.style.display = 'none';
-        }
-
-        // Reset button
         btn.innerHTML = originalText;
         btn.disabled = false;
         isGenerating = false;
-        console.log('✅ World generation complete!');
 
-        // Try WebSocket if connected
-        if (typeof ws !== 'undefined' && ws && ws.isConnected) {
-            ws.sendPrompt(world.name, { style: world.tags[0].toLowerCase() });
-            console.log('📤 Sent to WebSocket:', world.name);
-        }
-
-    }, 2000);
+        console.log('🌍 Generated world:', world.name);
+    }, 1500);
 };
 
-console.log('🎮 World controls loaded successfully!');
-console.log('✅ Click "Regenerate World" or press R key');
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'r' || e.key === 'R') window.generateWorld();
+});

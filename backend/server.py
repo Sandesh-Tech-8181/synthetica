@@ -1,13 +1,16 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import asyncio
 import random
 import time
 import base64
+import json
 from typing import List
 import uvicorn
+import requests  # For real AI
 
-app = FastAPI(title="Synthetica API", version="2.0.0")
+app = FastAPI(title="Synthetica API", version="3.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,12 +23,24 @@ app.add_middleware(
 class WorldGenerator:
     def __init__(self):
         self.locations = ["Tokyo", "Neo York", "Mumbai", "London", "Shanghai", "Dubai", "Berlin", "Bangkok", "Singapore", "Seoul", "Sydney", "Toronto"]
-        self.suffixes = ["2077", "2150", "Prime", "X", "Neon", "Quantum", "Digital", "Cyber", "Elite", "Pro"]
-        self.styles = ["cyberpunk", "neon", "fantasy", "sci-fi", "dystopian", "utopian", "quantum", "steampunk"]
+        self.suffixes = ["2077", "2150", "Prime", "X", "Neon", "Quantum", "Digital", "Cyber", "Elite", "Pro", "Nova", "Void"]
+        self.styles = ["cyberpunk", "neon", "fantasy", "sci-fi", "dystopian", "utopian", "quantum", "steampunk", "solarpunk", "dark"]
         self.elements = ["floating islands", "neon rivers", "holographic forests", "quantum palaces", "data streams", "crystal towers", "digital waterfalls", "cybernetic gardens"]
     
+    def generate_real_image(self, prompt: str) -> str:
+        """Generate REAL AI image using Pollinations.ai — FREE!"""
+        try:
+            # Pollinations.ai — No API key required
+            encoded_prompt = prompt.replace(' ', '%20')
+            image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=576&nologo=true&seed={random.randint(1, 9999)}"
+            return image_url
+        except Exception as e:
+            print(f"Image generation error: {e}")
+            return self.generate_preview(prompt)
+    
     def generate_preview(self, prompt: str) -> str:
-        colors = ['#6C5CE7', '#00D2D3', '#FF6B6B', '#FFB84D', '#4DFFFF', '#FF9FF3', '#54A0FF']
+        """Fallback: Simulated preview"""
+        colors = ['#6C5CE7', '#00D2D3', '#FF6B6B', '#FFB84D', '#4DFFFF', '#FF9FF3', '#54A0FF', '#FD79A8']
         c1, c2 = random.sample(colors, 2)
         svg = f'''<svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -56,14 +71,19 @@ class WorldGenerator:
         if not style:
             style = random.choice(self.styles)
         name = f"{random.choice(self.locations)}_{random.choice(self.suffixes)}"
-        tags = random.sample(self.elements, 3) + [random.choice(["neon", "holographic", "cybernetic", "quantum", "digital"])]
+        tags = random.sample(self.elements, 4)
+        
+        # Generate REAL AI image
+        real_image_url = self.generate_real_image(prompt)
+        
         return {
             "name": name,
             "style": style,
-            "tags": tags[:4],
+            "tags": tags,
             "seed": random.randint(1000, 9999),
             "prompt": prompt,
-            "preview": self.generate_preview(prompt)
+            "preview": real_image_url,  # REAL AI generated image!
+            "download_url": real_image_url
         }
 
 generator = WorldGenerator()
@@ -101,19 +121,20 @@ async def websocket_endpoint(websocket: WebSocket):
                 prompt = data.get("prompt", "A futuristic world")
                 style = data.get("style", "cyberpunk")
                 await manager.send(websocket, {"type": "status", "status": "generating", "message": f"🧠 Generating: {prompt}"})
+                
                 world = generator.generate(prompt, style)
-                stages = ["Planning layout", "Generating geometry", "Adding textures", "Applying lighting", "Finalizing world"]
-                for i in range(5):
-                    await asyncio.sleep(0.3)
-                    await manager.send(websocket, {
-                        "type": "frame",
-                        "payload": {
-                            "frame": i,
-                            "data": world["preview"],
-                            "progress": (i + 1) * 20,
-                            "stage": stages[i]
-                        }
-                    })
+                
+                # Send real image preview
+                await manager.send(websocket, {
+                    "type": "frame",
+                    "payload": {
+                        "frame": 0,
+                        "data": world["preview"],
+                        "progress": 100,
+                        "stage": "✨ World Ready!"
+                    }
+                })
+                
                 await manager.send(websocket, {"type": "world", "payload": world, "message": f"🌍 World '{world['name']}' ready!"})
                 await manager.send(websocket, {"type": "status", "status": "complete", "message": "✅ World generated successfully!"})
     except WebSocketDisconnect:
@@ -124,48 +145,21 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.get("/api/health")
 async def health():
-    return {"status": "healthy", "connections": len(manager.active_connections), "version": "2.0.0"}
+    return {"status": "healthy", "connections": len(manager.active_connections), "version": "3.0.0", "features": ["AI Image Generation", "WebSocket Streaming"]}
 
 @app.get("/api/features")
 async def features():
     return {"features": [
-        {"name": "Text to 3D World", "description": "Generate from prompts"},
-        {"name": "Real-time Streaming", "description": "WebSocket at 11 FPS"},
-        {"name": "128× Compression", "description": "19.1× faster"}
+        {"name": "Text to 3D World", "description": "Generate from prompts", "icon": "🧠"},
+        {"name": "Real-time Streaming", "description": "WebSocket at 11 FPS", "icon": "⚡"},
+        {"name": "128× Compression", "description": "19.1× faster", "icon": "📦"},
+        {"name": "AI Image Generation", "description": "Real images from text", "icon": "🎨"}
     ]}
 
 if __name__ == "__main__":
-    print("🚀 SYNTHETICA SERVER v2.0")
+    print("🚀 SYNTHETICA SERVER v3.0")
     print("📍 WebSocket: ws://localhost:8000/ws")
     print("📍 Health: http://localhost:8000/api/health")
     print("📍 Features: http://localhost:8000/api/features")
     print("=" * 50)
     uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)
-    # backend/server.py mein yeh add karo
-
-import replicate  # pip install replicate
-
-class WorldGenerator:
-    def generate_real_image(self, prompt: str) -> str:
-        """Generate real image using Stable Diffusion"""
-        output = replicate.run(
-            "stability-ai/stable-diffusion-3.5-large",
-            input={
-                "prompt": prompt + ", 3D world, immersive, detailed",
-                "width": 1024,
-                "height": 576,
-                "num_outputs": 1
-            }
-        )
-        return output[0]  # Image URL
-
-    def generate(self, prompt: str) -> dict:
-        # Real image generate karo
-        image_url = self.generate_real_image(prompt)
-        
-        return {
-            "name": f"{random.choice(self.locations)}_{random.choice(self.suffixes)}",
-            "preview": image_url,  # Real image!
-            "tags": ["AI Generated", "3D", "Immersive"],
-            "prompt": prompt
-        }
