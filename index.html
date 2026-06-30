@@ -353,7 +353,7 @@
   // ====== CONFIG ======
   // Set this to your deployed backend URL (Railway) once deployed.
   // For local testing, leave as-is to use the local FastAPI server.
-  const BACKEND_HTTP = window.SYNTHETICA_BACKEND || "http://localhost:8000";
+  const BACKEND_HTTP = window.SYNTHETICA_BACKEND || "https://synthetica-hy9w.onrender.com";
   const BACKEND_WS = BACKEND_HTTP.replace("https://", "wss://").replace("http://", "ws://");
 
   let ws = null;
