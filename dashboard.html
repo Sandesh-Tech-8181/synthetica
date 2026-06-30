@@ -1,272 +1,387 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard · Synthetica</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="static/css/style.css" />
-    <style>
-        .dashboard { padding: 100px 0 60px; min-height: 100vh; }
-        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
-        .dashboard-header h2 { font-size: 1.8rem; font-weight: 800; }
-        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-        .panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; }
-        .panel h3 { margin-bottom: 16px; font-size: 1.1rem; font-weight: 700; }
-        .world-list { display: flex; flex-direction: column; gap: 12px; max-height: 500px; overflow-y: auto; }
-        .world-list::-webkit-scrollbar { width: 4px; }
-        .world-list::-webkit-scrollbar-track { background: var(--bg-dark); }
-        .world-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-        .world-item { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--border-color); transition: var(--transition); }
-        .world-item:hover { border-color: rgba(108,92,231,0.3); background: rgba(108,92,231,0.03); }
-        .world-item .thumb { width: 48px; height: 48px; border-radius: 8px; background: linear-gradient(135deg, var(--primary), var(--secondary)); flex-shrink: 0; }
-        .world-item .info { flex: 1; }
-        .world-item .info h4 { font-size: 0.95rem; font-weight: 600; }
-        .world-item .info p { color: var(--text-muted); font-size: 0.8rem; }
-        .world-item .status { font-size: 0.7rem; font-weight: 600; color: var(--secondary); }
-        .world-item .status i { font-size: 0.5rem; }
-        .prompt-input { width: 100%; padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-dark); color: white; font-family: var(--font); font-size: 0.95rem; resize: vertical; transition: var(--transition); }
-        .prompt-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108,92,231,0.1); }
-        .generate-bar { display: flex; gap: 12px; margin-top: 12px; }
-        .generate-bar .btn { flex: 1; justify-content: center; }
-        #connectionStatus { margin-top: 12px; font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
-        #connectionStatus .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        #connectionStatus .dot.green { background: #28C840; }
-        #connectionStatus .dot.red { background: #FF5F57; }
-        #connectionStatus .dot.yellow { background: #FFBD2E; }
-        .quick-prompts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-        .quick-prompts button { background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 4px 14px; border-radius: 50px; font-size: 0.7rem; cursor: pointer; transition: var(--transition); font-family: var(--font); }
-        .quick-prompts button:hover { border-color: var(--primary); color: white; }
-        .profile-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; }
-        .profile-modal.active { display: flex; }
-        .profile-modal-content { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 40px; max-width: 420px; width: 90%; position: relative; }
-        .profile-modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; transition: var(--transition); }
-        .profile-modal-close:hover { color: white; }
-        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg,var(--primary),var(--secondary)); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700; color: white; }
-        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } .dashboard-header { flex-direction: column; align-items: flex-start; } .generate-bar { flex-direction: column; } }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — Synthetica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0a12;
+    --purple: #6C5CE7;
+    --purple-soft: #8b7ff0;
+    --cyan: #00D2D3;
+    --text: #f2f1f8;
+    --text-dim: #9a97b5;
+    --border: rgba(255,255,255,0.08);
+    --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background: radial-gradient(ellipse 70% 40% at 20% 0%, rgba(108,92,231,0.18), transparent),
+                radial-gradient(ellipse 50% 30% at 100% 20%, rgba(0,210,211,0.1), transparent),
+                var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+  .display{ font-family:'Space Grotesk', sans-serif; }
+
+  nav{
+    position: sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 5vw;
+    backdrop-filter: blur(16px);
+    background: rgba(10,10,18,0.65);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.1rem; text-decoration:none; color:var(--text); }
+  .logo-mark{
+    width:26px;height:26px;border-radius:8px;
+    background: conic-gradient(from 180deg, var(--purple), var(--cyan), var(--purple));
+    box-shadow: 0 0 16px rgba(108,92,231,0.6);
+  }
+  .conn-pill{
+    display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--text-dim);
+    border:1px solid var(--border); padding:7px 14px; border-radius:100px; background: var(--glass);
+  }
+  .conn-dot{ width:7px;height:7px;border-radius:50%; background:#666; transition: background .3s; }
+  .conn-dot.connected{ background: var(--cyan); box-shadow:0 0 8px var(--cyan); }
+
+  main{ max-width: 1280px; margin: 0 auto; padding: 40px 5vw 80px; display:grid; grid-template-columns: 380px 1fr; gap:28px; align-items:start; }
+
+  .panel{
+    background: var(--glass); border:1px solid var(--border); border-radius:18px;
+    backdrop-filter: blur(20px); padding: 26px;
+  }
+
+  .gen-panel h1{ font-family:'Space Grotesk'; font-size:1.4rem; margin-bottom:6px; font-weight:700; }
+  .gen-panel .sub{ color: var(--text-dim); font-size:0.85rem; margin-bottom:22px; line-height:1.5; }
+
+  label{ font-size:0.78rem; color: var(--text-dim); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; display:block; margin-bottom:8px; }
+  textarea{
+    width:100%; background: rgba(255,255,255,0.05); border:1px solid var(--border);
+    color: var(--text); padding: 13px 14px; border-radius: 12px; font-family:inherit; font-size:0.92rem;
+    outline:none; resize: vertical; min-height: 88px; transition: border-color .2s; line-height:1.5;
+  }
+  textarea:focus{ border-color: var(--purple-soft); }
+  textarea::placeholder{ color: #5e5b78; }
+
+  .field{ margin-bottom: 18px; }
+
+  .quick-chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .chip{
+    background: rgba(255,255,255,0.04); border:1px solid var(--border); color: var(--text-dim);
+    padding: 7px 14px; border-radius: 100px; font-size:0.78rem; cursor:pointer; font-family:inherit; font-weight:500;
+    transition: all .15s;
+  }
+  .chip:hover{ background: rgba(108,92,231,0.15); border-color: var(--purple-soft); color: var(--text); }
+
+  .btn{
+    border:none; cursor:pointer; font-family:inherit; font-weight:600;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+    width:100%; padding:13px; border-radius:11px; font-size:0.92rem;
+  }
+  .btn:active{ transform: scale(0.98); }
+  .btn-primary{
+    background: linear-gradient(135deg, var(--purple), #5849c4); color:#fff;
+    box-shadow: 0 4px 24px rgba(108,92,231,0.4);
+  }
+  .btn-primary:hover{ box-shadow: 0 6px 30px rgba(108,92,231,0.6); }
+  .btn-primary:disabled{ opacity:0.55; cursor:not-allowed; box-shadow:none; transform:none; }
+  .btn-ghost{ background: var(--glass); border:1px solid var(--border); color:var(--text); margin-top:10px; }
+  .btn-ghost:hover{ background: rgba(255,255,255,0.08); }
+
+  .status-row{
+    display:flex; align-items:center; gap:8px; font-size:0.82rem; color: var(--text-dim);
+    margin-top:16px; padding-top:16px; border-top: 1px solid var(--border);
+  }
+  .status-led{ width:7px;height:7px;border-radius:50%; background:#666; }
+  .status-led.generating{ background: var(--purple-soft); box-shadow:0 0 8px var(--purple-soft); animation: pulse 1s infinite; }
+  .status-led.ready{ background:#28c840; box-shadow:0 0 8px #28c840; }
+  .status-led.connected{ background: var(--cyan); box-shadow:0 0 8px var(--cyan); }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  /* current preview inside gen panel */
+  .preview-box{
+    margin-top: 18px; border-radius:14px; overflow:hidden; border:1px solid var(--border);
+    aspect-ratio: 4/3; position:relative; background: rgba(255,255,255,0.03);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .preview-box img{ width:100%; height:100%; object-fit:cover; display:none; }
+  .preview-empty{ color: var(--text-dim); font-size:0.8rem; text-align:center; padding:20px; }
+  .loading-overlay{
+    position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    background: rgba(10,10,18,0.6); backdrop-filter: blur(2px);
+  }
+  .loading-overlay.active{ display:flex; }
+  .spinner{
+    width:30px; height:30px; border-radius:50%;
+    border: 3px solid rgba(255,255,255,0.15); border-top-color: var(--cyan);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .loading-overlay span{ font-size:0.78rem; color: var(--text); }
+
+  /* worlds gallery */
+  .worlds-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .worlds-head h2{ font-family:'Space Grotesk'; font-size:1.3rem; font-weight:700; }
+  .worlds-head .count{ font-size:0.82rem; color: var(--text-dim); }
+
+  .worlds-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:18px; }
+  .world-card{
+    background: var(--glass); border:1px solid var(--border); border-radius:16px; overflow:hidden;
+    transition: transform .2s, border-color .2s; cursor:default;
+  }
+  .world-card:hover{ transform: translateY(-3px); border-color: rgba(108,92,231,0.35); }
+  .world-thumb{ aspect-ratio: 4/3; width:100%; object-fit:cover; display:block; background: rgba(255,255,255,0.03); }
+  .world-meta{ padding: 14px; }
+  .world-prompt{ font-size:0.82rem; color: var(--text); line-height:1.4; margin-bottom:10px;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .world-actions{ display:flex; gap:8px; }
+  .world-actions button{
+    flex:1; font-size:0.74rem; padding:7px; border-radius:8px; border:1px solid var(--border);
+    background: rgba(255,255,255,0.03); color: var(--text-dim); cursor:pointer; font-family:inherit; font-weight:500;
+    transition: all .15s;
+  }
+  .world-actions button:hover{ background: rgba(108,92,231,0.15); color: var(--text); border-color: var(--purple-soft); }
+
+  .empty-state{
+    grid-column: 1/-1; text-align:center; padding: 60px 20px; color: var(--text-dim);
+    border: 1px dashed var(--border); border-radius:16px;
+  }
+  .empty-state svg{ opacity:0.4; margin-bottom:14px; }
+  .empty-state p{ font-size:0.9rem; }
+
+  @media (max-width: 880px){
+    main{ grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
 
-<nav class="navbar" id="navbar">
-    <div class="container">
-        <a href="index.html" class="logo"><i class="fas fa-cube"></i> SYNTHETICA</a>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="about.html">About</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="contact.html">Contact</a>
-            <div class="websocket-badge" id="wsBadge2"><i class="fas fa-circle"></i><span>WebSocket</span><span class="status live">LIVE</span></div>
-            <button class="btn btn-primary btn-sm" onclick="openProfile()" style="cursor:pointer; border:none; font-family:var(--font);"><i class="fas fa-user"></i> Profile</button>
-        </div>
-        <div class="hamburger" id="hamburger2"><span></span><span></span><span></span></div>
-    </div>
+<nav>
+  <a href="index.html" class="logo"><div class="logo-mark"></div> Synthetica</a>
+  <div class="conn-pill"><div class="conn-dot" id="connDot"></div><span id="connText">Connecting…</span></div>
 </nav>
 
-<div class="profile-modal" id="profileModal">
-    <div class="profile-modal-content">
-        <button class="profile-modal-close" onclick="closeProfile()">&times;</button>
-        <div style="text-align:center; margin-bottom:24px;">
-            <div class="profile-avatar">👤</div>
-            <h2 style="font-size:1.5rem;">CSE Student</h2>
-            <p style="color:var(--text-secondary);">hello@synthetica.ai</p>
-        </div>
-        <div style="border-top:1px solid var(--border-color); padding-top:16px;">
-            <div style="display:flex; justify-content:space-between; padding:8px 0;"><span style="color:var(--text-secondary);">Plan</span><span style="font-weight:600; color:var(--secondary);">Free</span></div>
-            <div style="display:flex; justify-content:space-between; padding:8px 0;"><span style="color:var(--text-secondary);">Worlds Used</span><span style="font-weight:600;">4 / 25</span></div>
-            <div style="display:flex; justify-content:space-between; padding:8px 0;"><span style="color:var(--text-secondary);">Member Since</span><span style="font-weight:600;">2026</span></div>
-        </div>
-        <a href="index.html#pricing" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:16px;"><i class="fas fa-crown"></i> Upgrade to Pro</a>
-    </div>
-</div>
+<main>
+  <!-- Generator panel -->
+  <div class="panel gen-panel">
+    <h1>Generate a world</h1>
+    <p class="sub">Describe a place, and Synthetica will render it live.</p>
 
-<section class="dashboard">
-    <div class="container">
-        <div class="dashboard-header">
-            <h2>🚀 Your Worlds</h2>
-            <span class="badge"><i class="fas fa-circle" style="color:#28C840;"></i> 4/25 worlds remaining</span>
-        </div>
-        <div class="dashboard-grid">
-            <div class="panel">
-                <h3>Recent Creations</h3>
-                <div class="world-list" id="worldList">
-                    <div class="world-item"><div class="thumb"></div><div class="info"><h4>Neon Tokyo at Night</h4><p>Generated 2 hours ago</p></div><span class="status"><i class="fas fa-check-circle"></i> Ready</span></div>
-                    <div class="world-item"><div class="thumb" style="background:linear-gradient(135deg,#00D2D3,#6C5CE7);"></div><div class="info"><h4>Mystical Forest</h4><p>Generated yesterday</p></div><span class="status"><i class="fas fa-check-circle"></i> Ready</span></div>
-                    <div class="world-item"><div class="thumb" style="background:linear-gradient(135deg,#FF6B6B,#FFB84D);"></div><div class="info"><h4>Space Station Interior</h4><p>Generated 3 days ago</p></div><span class="status"><i class="fas fa-spinner fa-spin"></i> Processing</span></div>
-                </div>
-            </div>
-            <div class="panel">
-                <h3>✨ Create New World</h3>
-                <textarea class="prompt-input" id="promptInput" rows="4" placeholder="Describe your world... e.g., &quot;A cyberpunk city with flying cars at sunset&quot;">A futuristic Tokyo street at night, neon lights, rain, cyberpunk aesthetic</textarea>
-                <div class="quick-prompts">
-                    <button onclick="setPrompt('A serene forest with glowing mushrooms at midnight')">🌲 Forest</button>
-                    <button onclick="setPrompt('A cyberpunk city with flying cars and holographic billboards')">🌃 Cyberpunk</button>
-                    <button onclick="setPrompt('An ancient floating temple in the clouds')">🏯 Temple</button>
-                    <button onclick="setPrompt('A futuristic space station with Earth view')">🚀 Space</button>
-                </div>
-                <div class="generate-bar">
-                    <button class="btn btn-primary" id="generateBtn"><i class="fas fa-wand-magic-sparkles"></i> Generate</button>
-                    <button class="btn btn-outline" id="connectBtn"><i class="fas fa-plug"></i> Connect</button>
-                </div>
-                <div id="connectionStatus"><span class="dot red" id="statusDot"></span><span id="statusText">🔴 Disconnected</span></div>
-            </div>
-        </div>
+    <div class="field">
+      <label for="promptInput">Prompt</label>
+      <textarea id="promptInput" placeholder="A floating crystal city above the clouds, golden hour light…"></textarea>
+      <div class="quick-chips">
+        <button class="chip" onclick="setPrompt('A misty enchanted forest with glowing mushrooms and ancient trees')">🌲 Forest</button>
+        <button class="chip" onclick="setPrompt('A neon-lit cyberpunk city street at night, rain-soaked streets')">🌆 Cyberpunk</button>
+        <button class="chip" onclick="setPrompt('An ancient stone temple overgrown with jungle vines')">🏛️ Temple</button>
+        <button class="chip" onclick="setPrompt('A vast alien planet surface under twin moons and a starfield')">🚀 Space</button>
+      </div>
     </div>
-</section>
 
-<footer class="footer">
-    <div class="container">
-        <div class="footer-grid">
-            <div class="footer-brand"><a href="index.html" class="logo"><i class="fas fa-cube"></i> SYNTHETICA</a><p>AI World Generation Platform</p></div>
-            <div class="footer-links"><h5>Product</h5><a href="index.html#features">Features</a><a href="index.html#pricing">Pricing</a></div>
-            <div class="footer-links"><h5>Company</h5><a href="about.html">About</a><a href="contact.html">Contact</a></div>
-            <div class="footer-links"><h5>Support</h5><a href="contact.html">API</a><a href="contact.html">Docs</a></div>
-        </div>
-        <div class="footer-bottom"><p>&copy; 2026 Synthetica. Built with 128× compression.</p></div>
+    <button class="btn btn-primary" id="generateBtn" onclick="generateWorld()">Generate World</button>
+    <button class="btn btn-ghost" id="connectBtn" onclick="manualConnect()">Reconnect</button>
+
+    <div class="status-row">
+      <div class="status-led" id="statusLed"></div>
+      <span id="statusText">Idle</span>
     </div>
-</footer>
+
+    <div class="preview-box" id="previewBox">
+      <div class="preview-empty" id="previewEmpty">No world generated yet this session</div>
+      <img id="resultImg" alt="Generated world preview" />
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <span id="loadingText">Generating…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Worlds list -->
+  <div class="panel">
+    <div class="worlds-head">
+      <h2>Your Worlds</h2>
+      <span class="count" id="worldCount">0 generated</span>
+    </div>
+    <div class="worlds-grid" id="worldsGrid">
+      <div class="empty-state" id="emptyState">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16l5-6 4 5 3-4 6 8"/><circle cx="8" cy="8" r="2"/><rect x="2" y="3" width="20" height="18" rx="2"/></svg>
+        <p>Nothing here yet — generate your first world to start your collection.</p>
+      </div>
+    </div>
+  </div>
+</main>
 
 <script>
-// ===== BASIC FUNCTIONS =====
-function setPrompt(text) { 
-    document.getElementById('promptInput').value = text; 
-}
+  // ====== CONFIG ======
+  // Set this to your deployed Railway backend URL once deployed, e.g.:
+  // const BACKEND_HTTP = "https://synthetica-backend.up.railway.app";
+  const BACKEND_HTTP = window.SYNTHETICA_BACKEND || "http://localhost:8000";
+  const BACKEND_WS = BACKEND_HTTP.replace("https://", "wss://").replace("http://", "ws://");
 
-function openProfile() { 
-    document.getElementById('profileModal').classList.add('active'); 
-}
+  let ws = null;
+  let currentImageUrl = null;
+  let worlds = []; // { prompt, image_url, ts }
 
-function closeProfile() { 
-    document.getElementById('profileModal').classList.remove('active'); 
-}
+  function setPrompt(text){
+    document.getElementById('promptInput').value = text;
+    document.getElementById('promptInput').focus();
+  }
 
-window.onclick = function(event) { 
-    const modal = document.getElementById('profileModal'); 
-    if (event.target == modal) { 
-        modal.classList.remove('active'); 
-    } 
-};
+  function setStatus(state, text){
+    document.getElementById('statusLed').className = 'status-led' + (state ? ' ' + state : '');
+    document.getElementById('statusText').textContent = text;
+  }
 
-// ===== HAMBURGER MENU =====
-document.getElementById('hamburger2')?.addEventListener('click', function() { 
-    document.querySelector('.nav-links').classList.toggle('active'); 
-});
+  function setConn(connected){
+    document.getElementById('connDot').className = 'conn-dot' + (connected ? ' connected' : '');
+    document.getElementById('connText').textContent = connected ? 'Connected' : 'Offline (using direct mode)';
+  }
 
-// ===== CONNECT BUTTON =====
-document.getElementById('connectBtn')?.addEventListener('click', function() {
-    console.log('🔌 Connect button clicked');
-    if (typeof ws !== 'undefined' && ws) {
-        ws.connect();
-        document.getElementById('statusText').textContent = '🔄 Connecting...';
-        document.getElementById('statusDot').className = 'dot yellow';
-    } else {
-        alert('⚠️ WebSocket not initialized. Please refresh the page.');
-    }
-});
+  function connectWS(){
+    return new Promise((resolve, reject) => {
+      try{
+        ws = new WebSocket(BACKEND_WS + "/ws");
+        ws.onopen = () => { setConn(true); setStatus('connected', 'Connected'); resolve(ws); };
+        ws.onerror = () => reject(new Error('ws error'));
+        ws.onclose = () => { setConn(false); };
+      }catch(e){ reject(e); }
+    });
+  }
 
-// ===== GENERATE BUTTON =====
-document.getElementById('generateBtn')?.addEventListener('click', function() {
-    const prompt = document.getElementById('promptInput').value || 'A futuristic world';
-    console.log('🎯 Generate clicked:', prompt);
-    
-    if (typeof ws === 'undefined' || !ws) {
-        alert('⚠️ WebSocket not initialized. Please refresh the page.');
-        return;
-    }
-    
-    if (!ws.isConnected) {
-        alert('⚠️ Please connect to the server first. Click "Connect".');
-        document.getElementById('statusText').textContent = '⚠️ Not connected';
-        document.getElementById('statusDot').className = 'dot red';
-        return;
-    }
-    
-    ws.sendPrompt(prompt);
-    document.getElementById('statusText').textContent = '⏳ Generating...';
-    document.getElementById('statusDot').className = 'dot yellow';
-});
+  function manualConnect(){
+    setStatus('', 'Connecting…');
+    connectWS().catch(() => setStatus('', 'Idle (offline mode)'));
+  }
 
-// ===== AUTO-CONNECT ON PAGE LOAD =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 Dashboard loaded');
-    
-    // Try to connect after 1 second
-    setTimeout(function() {
-        if (typeof ws !== 'undefined' && ws && !ws.isConnected) {
-            console.log('🔄 Auto-connecting...');
-            ws.connect();
+  async function generateWorld(){
+    const promptInput = document.getElementById('promptInput');
+    const prompt = promptInput.value.trim();
+    if(!prompt){ promptInput.focus(); return; }
+
+    const btn = document.getElementById('generateBtn');
+    const overlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const previewEmpty = document.getElementById('previewEmpty');
+    const resultImg = document.getElementById('resultImg');
+
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    overlay.classList.add('active');
+    previewEmpty.style.display = 'none';
+
+    const finish = (url) => {
+      resultImg.src = url;
+      resultImg.onload = () => {
+        resultImg.style.display = 'block';
+        overlay.classList.remove('active');
+        currentImageUrl = url;
+        addWorld(prompt, url);
+        btn.disabled = false;
+        btn.textContent = 'Generate World';
+      };
+    };
+
+    try{
+      if(!ws || ws.readyState !== 1){
+        setStatus('generating', 'Connecting…');
+        await connectWS();
+      }
+      setStatus('generating', 'Generating…');
+      loadingText.textContent = 'Generating world…';
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if(data.status === 'generating'){
+          setStatus('generating', 'Generating…');
+        } else if(data.status === 'ready'){
+          setStatus('ready', 'Ready');
+          finish(data.image_url);
+        } else if(data.status === 'error'){
+          setStatus('', 'Error');
+          loadingText.textContent = data.message || 'Generation failed';
+          setTimeout(()=>overlay.classList.remove('active'), 1800);
+          btn.disabled = false;
+          btn.textContent = 'Generate World';
         }
-    }, 1000);
-    
-    // Check connection status after 2 seconds
-    setTimeout(function() {
-        if (typeof ws !== 'undefined' && ws && ws.isConnected) {
-            document.getElementById('statusText').textContent = '🟢 Connected to Synthetica';
-            document.getElementById('statusDot').className = 'dot green';
-        } else {
-            document.getElementById('statusText').textContent = '⚠️ Click "Connect" to start';
-            document.getElementById('statusDot').className = 'dot red';
-        }
-    }, 2500);
-});
+      };
+      ws.send(JSON.stringify({ prompt }));
 
-// ===== OVERRIDE WS STATUS HANDLER =====
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait for ws to be defined
-    const checkWs = setInterval(function() {
-        if (typeof ws !== 'undefined' && ws) {
-            clearInterval(checkWs);
-            console.log('✅ WebSocket found, overriding status handler');
-            
-            // Save original onStatus
-            const originalOnStatus = ws.onStatus;
-            
-            // Override
-            ws.onStatus = function(status, message) {
-                console.log('📡 Status update:', status, message);
-                
-                // Call original if exists
-                if (originalOnStatus && typeof originalOnStatus === 'function') {
-                    originalOnStatus(status, message);
-                }
-                
-                // Update dashboard status
-                const statusText = document.getElementById('statusText');
-                const statusDot = document.getElementById('statusDot');
-                
-                if (statusText && statusDot) {
-                    if (status === 'connected' || status === 'complete') {
-                        statusText.textContent = '🟢 ' + (message || 'Connected to Synthetica');
-                        statusDot.className = 'dot green';
-                    } else if (status === 'reconnecting') {
-                        statusText.textContent = '🔄 ' + message;
-                        statusDot.className = 'dot yellow';
-                    } else if (status === 'generating') {
-                        statusText.textContent = '⏳ ' + message;
-                        statusDot.className = 'dot yellow';
-                    } else if (status === 'world') {
-                        statusText.textContent = '🌍 ' + message;
-                        statusDot.className = 'dot green';
-                    } else if (status === 'failed') {
-                        statusText.textContent = '❌ ' + message;
-                        statusDot.className = 'dot red';
-                    } else {
-                        statusText.textContent = '⚪ ' + (message || 'Disconnected');
-                        statusDot.className = 'dot red';
-                    }
-                }
-            };
-            
-            console.log('✅ Status handler updated successfully!');
-        }
-    }, 100);
-});
+    }catch(err){
+      console.warn('WS unavailable, falling back to direct Pollinations call:', err);
+      const seed = Math.floor(Math.random()*100000);
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', cinematic, highly detailed, digital art')}?width=768&height=576&seed=${seed}&nologo=true`;
+      finish(url);
+      setStatus('ready', 'Ready (direct)');
+    }
+  }
 
-console.log('🚀 Dashboard ready!');
+  function addWorld(prompt, url){
+    worlds.unshift({ prompt, url, ts: Date.now() });
+    renderWorlds();
+  }
+
+  function renderWorlds(){
+    const grid = document.getElementById('worldsGrid');
+    document.getElementById('worldCount').textContent = `${worlds.length} generated`;
+
+    if(worlds.length === 0){
+      grid.innerHTML = `<div class="empty-state" id="emptyState">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16l5-6 4 5 3-4 6 8"/><circle cx="8" cy="8" r="2"/><rect x="2" y="3" width="20" height="18" rx="2"/></svg>
+        <p>Nothing here yet — generate your first world to start your collection.</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = worlds.map((w, i) => `
+      <div class="world-card">
+        <img class="world-thumb" src="${w.url}" alt="${escapeHtml(w.prompt)}" loading="lazy" />
+        <div class="world-meta">
+          <div class="world-prompt">${escapeHtml(w.prompt)}</div>
+          <div class="world-actions">
+            <button onclick="downloadWorld(${i})">↓ Download</button>
+            <button onclick="regenerateWorld(${i})">↻ Regenerate</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function downloadWorld(i){
+    const w = worlds[i];
+    try{
+      const res = await fetch(w.url, { mode: 'cors' });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `synthetica-world-${w.ts}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }catch(e){
+      window.open(w.url, '_blank');
+    }
+  }
+
+  function regenerateWorld(i){
+    document.getElementById('promptInput').value = worlds[i].prompt;
+    generateWorld();
+  }
+
+  // Initial connect attempt
+  manualConnect();
 </script>
 
-<script src="static/js/main.js"></script>
-<script src="static/js/websocket.js"></script>
 </body>
 </html>

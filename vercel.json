@@ -1,16 +1,20 @@
 {
-    "rewrites": [
-        { "source": "/api/(.*)", "destination": "http://localhost:8000/api/$1" },
-        { "source": "/ws", "destination": "http://localhost:8000/ws" }
-    ],
-    "headers": [
-        {
-            "source": "/(.*)",
-            "headers": [
-                { "key": "Access-Control-Allow-Origin", "value": "*" },
-                { "key": "Access-Control-Allow-Methods", "value": "GET,POST,OPTIONS" },
-                { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
-            ]
-        }
-    ]
+  "version": 2,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+      ]
+    }
+  ]
 }

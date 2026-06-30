@@ -1,320 +1,485 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Synthetica 3.0 · AI World Generator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="static/css/style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Synthetica — Generate Worlds From Words</title>
+<meta name="description" content="Synthetica turns a sentence into a living world. Type a prompt, watch it materialize." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0a12;
+    --bg-soft: #0f0f1a;
+    --purple: #6C5CE7;
+    --purple-soft: #8b7ff0;
+    --cyan: #00D2D3;
+    --text: #f2f1f8;
+    --text-dim: #9a97b5;
+    --border: rgba(255,255,255,0.08);
+    --glass: rgba(255,255,255,0.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(108,92,231,0.25), transparent),
+                radial-gradient(ellipse 60% 40% at 90% 10%, rgba(0,210,211,0.12), transparent),
+                var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .display{ font-family:'Space Grotesk', sans-serif; }
+
+  /* nav */
+  nav{
+    position: sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 5vw;
+    backdrop-filter: blur(16px);
+    background: rgba(10,10,18,0.6);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.15rem; }
+  .logo-mark{
+    width:28px;height:28px;border-radius:8px;
+    background: conic-gradient(from 180deg, var(--purple), var(--cyan), var(--purple));
+    box-shadow: 0 0 20px rgba(108,92,231,0.6);
+  }
+  .nav-links{ display:flex; gap:32px; align-items:center; }
+  .nav-links a{ color: var(--text-dim); text-decoration:none; font-size:0.92rem; font-weight:500; transition: color .2s; }
+  .nav-links a:hover{ color: var(--text); }
+  .btn{
+    border:none; cursor:pointer; font-family:inherit; font-weight:600;
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn-primary{
+    background: linear-gradient(135deg, var(--purple), #5849c4);
+    color:#fff; padding:11px 22px; border-radius:10px; font-size:0.92rem;
+    box-shadow: 0 4px 24px rgba(108,92,231,0.4);
+  }
+  .btn-primary:hover{ box-shadow: 0 6px 30px rgba(108,92,231,0.6); transform: translateY(-1px); }
+  .btn-ghost{
+    background: var(--glass); border:1px solid var(--border); color:var(--text);
+    padding:10px 20px; border-radius:10px; font-size:0.92rem;
+  }
+  .btn-ghost:hover{ background: rgba(255,255,255,0.08); }
+  .btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none !important; }
+
+  /* hero */
+  .hero{
+    display:grid; grid-template-columns: 1.05fr 1fr; gap:56px;
+    align-items:center;
+    padding: 84px 5vw 60px;
+    max-width: 1320px; margin: 0 auto;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:0.78rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+    color: var(--cyan); background: rgba(0,210,211,0.08); border:1px solid rgba(0,210,211,0.25);
+    padding:6px 14px; border-radius:100px; margin-bottom:22px;
+  }
+  .eyebrow .dot{ width:6px;height:6px;border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan); animation: pulse 2s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: clamp(2.4rem, 4.4vw, 3.8rem);
+    line-height: 1.06; font-weight:700; letter-spacing:-0.02em;
+    margin-bottom: 22px;
+  }
+  h1 .grad{
+    background: linear-gradient(100deg, var(--purple-soft), var(--cyan));
+    -webkit-background-clip: text; background-clip:text; color:transparent;
+  }
+  .hero p.lead{
+    font-size: 1.08rem; color: var(--text-dim); line-height:1.65; max-width: 520px; margin-bottom: 34px;
+  }
+  .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom: 40px; }
+  .hero-stats{ display:flex; gap:36px; }
+  .stat .num{ font-family:'Space Grotesk'; font-size:1.5rem; font-weight:700; }
+  .stat .label{ font-size:0.8rem; color:var(--text-dim); }
+
+  /* demo window */
+  .demo-card{
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+  .demo-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+  }
+  .demo-dots{ display:flex; gap:6px; }
+  .demo-dots span{ width:10px;height:10px;border-radius:50%; }
+  .demo-dots span:nth-child(1){ background:#ff5f57; }
+  .demo-dots span:nth-child(2){ background:#febc2e; }
+  .demo-dots span:nth-child(3){ background:#28c840; }
+  .demo-status{
+    font-size:0.78rem; color: var(--text-dim); display:flex; align-items:center; gap:6px; font-weight:500;
+  }
+  .status-led{ width:7px;height:7px;border-radius:50%; background:#666; transition: background .3s; }
+  .status-led.connected{ background: var(--cyan); box-shadow:0 0 8px var(--cyan); }
+  .status-led.generating{ background: var(--purple-soft); box-shadow:0 0 8px var(--purple-soft); animation: pulse 1s infinite; }
+  .status-led.ready{ background:#28c840; box-shadow:0 0 8px #28c840; }
+
+  .demo-viewport{
+    aspect-ratio: 4/3; position:relative;
+    background:
+      linear-gradient(135deg, rgba(108,92,231,0.15), rgba(0,210,211,0.1));
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .demo-viewport img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .demo-placeholder{ text-align:center; color: var(--text-dim); padding: 20px; }
+  .demo-placeholder svg{ opacity:0.5; margin-bottom:10px; }
+  .demo-placeholder p{ font-size:0.85rem; max-width:240px; margin:0 auto; }
+
+  .loading-overlay{
+    position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    background: rgba(10,10,18,0.55); backdrop-filter: blur(2px);
+  }
+  .loading-overlay.active{ display:flex; }
+  .spinner{
+    width:36px; height:36px; border-radius:50%;
+    border: 3px solid rgba(255,255,255,0.15); border-top-color: var(--cyan);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .loading-overlay span{ font-size:0.85rem; color: var(--text); font-weight:500; }
+
+  .demo-controls{ padding: 18px; display:flex; flex-direction:column; gap:12px; }
+  .prompt-row{ display:flex; gap:10px; }
+  .prompt-row input{
+    flex:1; background: rgba(255,255,255,0.05); border:1px solid var(--border);
+    color: var(--text); padding: 12px 14px; border-radius: 10px; font-family:inherit; font-size:0.9rem;
+    outline:none; transition: border-color .2s;
+  }
+  .prompt-row input:focus{ border-color: var(--purple-soft); }
+  .prompt-row input::placeholder{ color: #5e5b78; }
+  .quick-chips{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{
+    background: rgba(255,255,255,0.04); border:1px solid var(--border); color: var(--text-dim);
+    padding: 6px 13px; border-radius: 100px; font-size:0.78rem; cursor:pointer; font-family:inherit; font-weight:500;
+    transition: all .15s;
+  }
+  .chip:hover{ background: rgba(108,92,231,0.15); border-color: var(--purple-soft); color: var(--text); }
+  .demo-footer-btns{ display:flex; gap:10px; }
+  .demo-footer-btns .btn{ flex:1; }
+
+  /* features */
+  .section{ padding: 90px 5vw; max-width: 1320px; margin: 0 auto; }
+  .section-head{ text-align:center; max-width:600px; margin: 0 auto 56px; }
+  .section-head .eyebrow{ margin-bottom:16px; }
+  .section-head h2{ font-family:'Space Grotesk'; font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight:700; margin-bottom:14px; letter-spacing:-0.01em; }
+  .section-head p{ color: var(--text-dim); font-size:1rem; line-height:1.6; }
+
+  .features-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:22px; }
+  .feature-card{
+    background: var(--glass); border:1px solid var(--border); border-radius:16px;
+    padding: 28px; transition: transform .2s, border-color .2s;
+  }
+  .feature-card:hover{ transform: translateY(-4px); border-color: rgba(108,92,231,0.4); }
+  .feature-icon{
+    width:42px;height:42px;border-radius:11px; display:flex;align-items:center;justify-content:center;
+    background: linear-gradient(135deg, rgba(108,92,231,0.25), rgba(0,210,211,0.15));
+    margin-bottom:18px;
+  }
+  .feature-card h3{ font-family:'Space Grotesk'; font-size:1.05rem; margin-bottom:8px; font-weight:600; }
+  .feature-card p{ color: var(--text-dim); font-size:0.88rem; line-height:1.6; }
+
+  /* how it works */
+  .steps{ display:grid; grid-template-columns: repeat(3,1fr); gap:0; position:relative; }
+  .step{ text-align:left; padding: 0 18px; position:relative; }
+  .step-num{
+    font-family:'Space Grotesk'; font-size:0.78rem; font-weight:700; color: var(--cyan);
+    border:1px solid rgba(0,210,211,0.3); width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center; margin-bottom:16px;
+  }
+  .step h3{ font-family:'Space Grotesk'; font-size:1.05rem; margin-bottom:8px; }
+  .step p{ color:var(--text-dim); font-size:0.88rem; line-height:1.6; }
+
+  /* cta */
+  .cta-band{
+    margin: 0 5vw 90px; padding: 60px 40px; text-align:center; border-radius:24px;
+    background: linear-gradient(135deg, rgba(108,92,231,0.18), rgba(0,210,211,0.1));
+    border:1px solid var(--border); position:relative; overflow:hidden;
+  }
+  .cta-band h2{ font-family:'Space Grotesk'; font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom:14px; font-weight:700; }
+  .cta-band p{ color: var(--text-dim); margin-bottom:28px; }
+  .cta-band .btn-primary{ padding:14px 30px; font-size:1rem; }
+
+  footer{
+    border-top: 1px solid var(--border); padding: 28px 5vw; text-align:center;
+    color: var(--text-dim); font-size:0.82rem;
+  }
+
+  @media (max-width: 980px){
+    .hero{ grid-template-columns: 1fr; padding-top: 50px; }
+    .features-grid{ grid-template-columns: 1fr; }
+    .steps{ grid-template-columns: 1fr; gap:28px; }
+    .nav-links{ display:none; }
+    .hero-stats{ flex-wrap:wrap; gap:24px; }
+  }
+</style>
 </head>
 <body>
 
-<!-- ===== PARTICLES ===== -->
-<div id="particles-js"></div>
-
-<!-- ===== NAVBAR ===== -->
-<nav class="navbar" id="navbar">
-    <div class="container">
-        <a href="#" class="logo"><i class="fas fa-cube"></i> SYNTHETICA</a>
-        <div class="nav-links">
-            <a href="#hero">Home</a>
-            <a href="#features">Features</a>
-            <a href="#pricing">Pricing</a>
-            <div class="websocket-badge" id="wsBadge">
-                <i class="fas fa-circle"></i>
-                <span>WebSocket</span>
-                <span class="status live">LIVE</span>
-            </div>
-            <a href="dashboard.html" class="btn btn-primary btn-sm">
-                <i class="fas fa-rocket"></i> Launch App
-            </a>
-        </div>
-        <div class="hamburger" id="hamburger">
-            <span></span><span></span><span></span>
-        </div>
-    </div>
+<nav>
+  <div class="logo"><div class="logo-mark"></div> Synthetica</div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+  <a href="dashboard.html" class="btn btn-primary">Open Dashboard</a>
 </nav>
 
-<!-- ===== HERO ===== -->
-<section class="hero" id="hero">
-    <div class="container">
-        <div class="hero-grid">
-            <div class="hero-content">
-                <div class="badge">
-                    <i class="fas fa-bolt"></i> AI WORLD GENERATION 3.0
-                </div>
-                <h1>
-                    Generate<br />
-                    <span class="gradient-text">Interactive</span><br />
-                    Worlds in<br />
-                    <span class="gradient-text">Real Time</span>
-                </h1>
-                <div class="hero-status">
-                    <div class="status-indicator">
-                        <i class="fas fa-circle"></i>
-                        <span>WebSocket Connection</span>
-                        <span class="status-badge live">LIVE</span>
-                    </div>
-                </div>
-                <p class="hero-desc">
-                    Synthetica uses advanced AI to generate, compress and stream
-                    fully interactive 3D worlds in real-time.
-                    <span class="highlight">128× compression</span> ·
-                    <span class="highlight">19.1× faster</span> ·
-                    <span class="highlight">11 FPS</span>
-                </p>
-                <div class="hero-actions">
-                    <a href="dashboard.html" class="btn btn-primary btn-lg">
-                        <i class="fas fa-play"></i> Start Creating
-                    </a>
-                    <a href="#features" class="btn btn-outline btn-lg">
-                        <i class="fas fa-video"></i> See Features
-                    </a>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="demo-window">
-                    <div class="demo-header">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
-                        <span class="demo-title">LIVE WORLD DEMO</span>
-                        <span class="demo-badge"><i class="fas fa-circle"></i> 11 FPS</span>
-                        <span class="demo-badge"><i class="fas fa-expand"></i> 1920×1080</span>
-                    </div>
-                    <div class="demo-content">
-                        <div class="world-preview">
-                            <div class="preview-scene" id="previewScene">
-                                <div class="world-overlay">
-                                    <div class="world-info">
-                                        <span class="world-name" id="worldName">Tokyo_2077</span>
-                                        <span class="world-controls">
-                                            <i class="fas fa-arrows-alt" title="Pan"></i>
-                                            <i class="fas fa-rotate" title="Rotate"></i>
-                                            <i class="fas fa-search-plus" title="Zoom"></i>
-                                        </span>
-                                    </div>
-                                    <div class="world-tags" id="worldTags">
-                                        <span class="tag">Cyberpunk</span>
-                                        <span class="tag">Neon</span>
-                                        <span class="tag">Rain</span>
-                                        <span class="tag">Holographic</span>
-                                    </div>
-                                    <div class="world-actions">
-                                        <button class="world-btn" onclick="generateWorld()">
-                                            <i class="fas fa-sync-alt"></i> Regenerate World
-                                        </button>
-                                        <button class="download-btn" id="downloadBtn" onclick="downloadWorld()" style="display:none;">
-                                            <i class="fas fa-download"></i> Download
-                                        </button>
-                                    </div>
-                                    <div class="world-watermark">
-                                        <span id="worldMood">Floating Islands</span>
-                                        <span id="worldStyle">AI Cityscape</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="preview-overlay">
-                                <span class="live-badge" id="liveBadge">
-                                    <i class="fas fa-circle"></i> LIVE
-                                </span>
-                            </div>
-                            <div class="generation-progress">
-                                <div class="bar" id="progressBar"></div>
-                            </div>
-                            <div class="generation-stage" id="generationStage">🧠 Generating...</div>
-                        </div>
-                    </div>
-                    <!-- Result Card -->
-                    <div id="resultCard" style="display:none;" class="result-card">
-                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-                            <span class="result-badge"><i class="fas fa-check-circle"></i> Generated!</span>
-                            <span style="color:var(--text-muted); font-size:0.8rem;" id="resultTime"></span>
-                        </div>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-                            <div class="info-item">
-                                <div class="label">World Name</div>
-                                <div class="value" id="resultName">Tokyo_2077</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="label">Style</div>
-                                <div class="value" id="resultStyle">Cyberpunk</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="label">Tags</div>
-                                <div class="value" id="resultTags">Neon · Rain</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="label">Status</div>
-                                <div class="value" style="color:#28C840;">✅ Ready</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<section class="hero">
+  <div>
+    <div class="eyebrow"><span class="dot"></span> Live AI world generation</div>
+    <h1>Describe a world.<br>Watch it <span class="grad">materialize.</span></h1>
+    <p class="lead">Synthetica turns a single sentence into a fully rendered world — forests, cities, temples, galaxies — generated live by AI, streamed back to you in seconds.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-primary" onclick="document.getElementById('promptInput').focus()">Try it below ↓</button>
+      <a href="dashboard.html" class="btn btn-ghost">Go to Dashboard</a>
     </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="num">100%</div><div class="label">Free to generate</div></div>
+      <div class="stat"><div class="num">&lt;15s</div><div class="label">Avg. render time</div></div>
+      <div class="stat"><div class="num">∞</div><div class="label">Unique worlds</div></div>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <div class="demo-header">
+      <div class="demo-dots"><span></span><span></span><span></span></div>
+      <div class="demo-status"><div class="status-led" id="statusLed"></div><span id="statusText">Idle</span></div>
+    </div>
+    <div class="demo-viewport" id="viewport">
+      <div class="demo-placeholder" id="placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16l5-6 4 5 3-4 6 8"/><circle cx="8" cy="8" r="2"/><rect x="2" y="3" width="20" height="18" rx="2"/></svg>
+        <p>Your generated world will appear here</p>
+      </div>
+      <img id="resultImg" style="display:none;" alt="Generated world" />
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <span id="loadingText">Generating world…</span>
+      </div>
+    </div>
+    <div class="demo-controls">
+      <div class="prompt-row">
+        <input type="text" id="promptInput" placeholder="A floating crystal city above the clouds…" />
+        <button class="btn btn-primary" id="generateBtn" onclick="generateWorld()">Generate</button>
+      </div>
+      <div class="quick-chips">
+        <button class="chip" onclick="setPrompt('A misty enchanted forest with glowing mushrooms')">🌲 Forest</button>
+        <button class="chip" onclick="setPrompt('A neon-lit cyberpunk city street at night, rain-soaked')">🌆 Cyberpunk</button>
+        <button class="chip" onclick="setPrompt('An ancient overgrown temple deep in the jungle')">🏛️ Temple</button>
+        <button class="chip" onclick="setPrompt('A vast alien planet surface under twin moons')">🚀 Space</button>
+      </div>
+      <div class="demo-footer-btns">
+        <button class="btn btn-ghost" id="downloadBtn" onclick="downloadImage()" disabled>↓ Download PNG</button>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- ===== STATS ===== -->
-<section class="stats" id="stats">
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" data-count="128">0</div>
-                <span class="stat-label">× Compression</span>
-                <p class="stat-desc">Smaller files, bigger possibilities</p>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" data-count="19.1">0</div>
-                <span class="stat-label">× Faster Generation</span>
-                <p class="stat-desc">Unprecedented real-time speed</p>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" data-count="11">0</div>
-                <span class="stat-label">FPS Live Performance</span>
-                <p class="stat-desc">Smooth interactive streaming</p>
-            </div>
-        </div>
+<section class="section" id="features">
+  <div class="section-head">
+    <div class="eyebrow" style="margin:0 auto 16px;width:fit-content;"><span class="dot"></span> Why Synthetica</div>
+    <h2>Built for fast, real exploration</h2>
+    <p>No sign-up walls, no credit gating on the demo. Just prompt and render.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D2D3" stroke-width="2"><path d="M13 2L3 14h7l-1 8 11-12h-7z"/></svg></div>
+      <h3>Real-time streaming</h3>
+      <p>A persistent WebSocket connection pushes status updates the moment your world starts rendering — no polling, no refresh.</p>
     </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b7ff0" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+      <h3>Genuine AI rendering</h3>
+      <p>Every world is generated fresh from your exact words using diffusion models — never a stock image, never repeated.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D2D3" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg></div>
+      <h3>Save and revisit</h3>
+      <p>Every world you generate lands in your dashboard, ready to download or regenerate with a tweaked prompt.</p>
+    </div>
+  </div>
 </section>
 
-<!-- ===== FEATURES ===== -->
-<section class="features" id="features">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-tag">Features</span>
-            <h2>Built for the Future of <span class="gradient-text">Interactive Worlds</span></h2>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🧠</div>
-                <h3>AI-Powered Generation</h3>
-                <p>State-of-the-art models create rich 3D worlds from simple prompts.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Real-Time Streaming</h3>
-                <p>WebSocket-powered delivery at 11 FPS for instant interaction.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📦</div>
-                <h3>128× Compression</h3>
-                <p>19.1× faster inference with no quality loss.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎨</div>
-                <h3>AI Image Generation</h3>
-                <p>Real images from text prompts using Pollinations.ai.</p>
-            </div>
-        </div>
+<section class="section" id="how">
+  <div class="section-head">
+    <h2>From sentence to world in three steps</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Describe it</h3>
+      <p>Type what you want to see — a place, a mood, a scene. Specific words make for sharper worlds.</p>
     </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Watch it render</h3>
+      <p>Status updates stream in live over WebSocket: connecting, generating, ready — no waiting in the dark.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Keep it</h3>
+      <p>Download the PNG instantly, or save it to your dashboard to build a growing gallery of worlds.</p>
+    </div>
+  </div>
 </section>
 
-<!-- ===== PRICING ===== -->
-<section class="pricing" id="pricing">
-    <div class="container">
-        <div class="section-header">
-            <span class="section-tag">Pricing</span>
-            <h2>Start Building <span class="gradient-text">For Free</span></h2>
-        </div>
-        <div class="pricing-grid">
-            <div class="pricing-card">
-                <div class="pricing-header"><h4>Free</h4><p>Explore & create</p></div>
-                <div class="pricing-price">$0 <span>/ month</span></div>
-                <ul>
-                    <li><i class="fas fa-check"></i> 4 worlds/month</li>
-                    <li><i class="fas fa-check"></i> Text prompts</li>
-                    <li><i class="fas fa-check"></i> 60s exploration</li>
-                    <li><i class="fas fa-xmark"></i> No export</li>
-                </ul>
-                <a href="dashboard.html" class="btn btn-outline">Get Started</a>
-            </div>
-            <div class="pricing-card popular">
-                <div class="popular-badge">Most Popular</div>
-                <div class="pricing-header"><h4>Pro</h4><p>For serious creators</p></div>
-                <div class="pricing-price">$20 <span>/ month</span></div>
-                <ul>
-                    <li><i class="fas fa-check"></i> 25 worlds/month</li>
-                    <li><i class="fas fa-check"></i> Image + 3D upload</li>
-                    <li><i class="fas fa-check"></i> 5 min exploration</li>
-                    <li><i class="fas fa-check"></i> Unity export</li>
-                </ul>
-                <a href="dashboard.html" class="btn btn-primary">Start Pro</a>
-            </div>
-            <div class="pricing-card">
-                <div class="pricing-header"><h4>Studio</h4><p>For teams</p></div>
-                <div class="pricing-price">$95 <span>/ month</span></div>
-                <ul>
-                    <li><i class="fas fa-check"></i> 75 worlds/month</li>
-                    <li><i class="fas fa-check"></i> Full 3D editing</li>
-                    <li><i class="fas fa-check"></i> Unlimited exploration</li>
-                    <li><i class="fas fa-check"></i> All exports</li>
-                </ul>
-                <a href="contact.html" class="btn btn-outline">Contact Sales</a>
-            </div>
-        </div>
-    </div>
-</section>
+<div class="cta-band">
+  <h2>Your first world is one sentence away</h2>
+  <p>Open the dashboard and start generating — it's free.</p>
+  <a href="dashboard.html" class="btn btn-primary">Open Dashboard →</a>
+</div>
 
-<!-- ===== CTA ===== -->
-<section class="cta">
-    <div class="container">
-        <div class="cta-box">
-            <h2>Ready to Build <span class="gradient-text">Interactive Worlds?</span></h2>
-            <p>Join the next generation of world builders.</p>
-            <form id="subscribeForm">
-                <input type="email" placeholder="Enter your email" required />
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-arrow-right"></i> Get Early Access
-                </button>
-            </form>
-        </div>
-    </div>
-</section>
-
-<!-- ===== FOOTER ===== -->
-<footer class="footer">
-    <div class="container">
-        <div class="footer-grid">
-            <div class="footer-brand">
-                <a href="#" class="logo"><i class="fas fa-cube"></i> SYNTHETICA</a>
-                <p>AI World Generation Platform</p>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">
-                    <span id="liveStatus">🟢 All systems operational</span>
-                </p>
-            </div>
-            <div class="footer-links"><h5>Product</h5><a href="#features">Features</a><a href="#pricing">Pricing</a></div>
-            <div class="footer-links"><h5>Company</h5><a href="about.html">About</a><a href="contact.html">Contact</a></div>
-            <div class="footer-links"><h5>Support</h5><a href="contact.html">API</a><a href="contact.html">Docs</a></div>
-        </div>
-        <div class="footer-bottom"><p>&copy; 2026 Synthetica. Built with 128× compression.</p></div>
-    </div>
+<footer>
+  © 2026 Synthetica. Worlds generated via Pollinations.ai.
 </footer>
 
-<script src="static/js/main.js"></script>
-<script src="static/js/websocket.js"></script>
-<script src="static/js/world_controls.js"></script>
-
-<!-- ===== PARTICLES SCRIPT ===== -->
 <script>
-// Floating particles
-document.addEventListener('DOMContentLoaded', function() {
-    for (let i = 0; i < 30; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        const size = Math.random() * 6 + 2;
-        particle.style.width = size + 'px';
-        particle.style.height = size + 'px';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
-        particle.style.animationDelay = (Math.random() * 10) + 's';
-        particle.style.background = `radial-gradient(circle, ${['#6C5CE7', '#00D2D3', '#FF6B6B', '#FFB84D'][Math.floor(Math.random() * 4)]}, transparent)`;
-        document.body.appendChild(particle);
+  // ====== CONFIG ======
+  // Set this to your deployed backend URL (Railway) once deployed.
+  // For local testing, leave as-is to use the local FastAPI server.
+  const BACKEND_HTTP = window.SYNTHETICA_BACKEND || "http://localhost:8000";
+  const BACKEND_WS = BACKEND_HTTP.replace("https://", "wss://").replace("http://", "ws://");
+
+  let ws = null;
+  let currentImageUrl = null;
+
+  function setPrompt(text){
+    document.getElementById('promptInput').value = text;
+    document.getElementById('promptInput').focus();
+  }
+
+  function setStatus(state, text){
+    const led = document.getElementById('statusLed');
+    const label = document.getElementById('statusText');
+    led.className = 'status-led' + (state ? ' ' + state : '');
+    label.textContent = text;
+  }
+
+  function connectWS(){
+    return new Promise((resolve, reject) => {
+      try{
+        ws = new WebSocket(BACKEND_WS + "/ws");
+        ws.onopen = () => { setStatus('connected', 'Connected'); resolve(ws); };
+        ws.onerror = () => { reject(new Error('ws error')); };
+        ws.onclose = () => { setStatus('', 'Idle'); };
+      }catch(e){ reject(e); }
+    });
+  }
+
+  async function generateWorld(){
+    const promptInput = document.getElementById('promptInput');
+    const prompt = promptInput.value.trim();
+    if(!prompt){ promptInput.focus(); return; }
+
+    const btn = document.getElementById('generateBtn');
+    const overlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
+    const placeholder = document.getElementById('placeholder');
+    const resultImg = document.getElementById('resultImg');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+    overlay.classList.add('active');
+    placeholder.style.display = 'none';
+    downloadBtn.disabled = true;
+
+    try{
+      if(!ws || ws.readyState !== 1){
+        setStatus('generating', 'Connecting…');
+        await connectWS();
+      }
+
+      setStatus('generating', 'Generating…');
+      loadingText.textContent = 'Generating world…';
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if(data.status === 'generating'){
+          setStatus('generating', 'Generating…');
+        } else if(data.status === 'ready'){
+          setStatus('ready', 'Ready');
+          resultImg.src = data.image_url;
+          resultImg.onload = () => {
+            resultImg.style.display = 'block';
+            overlay.classList.remove('active');
+            currentImageUrl = data.image_url;
+            downloadBtn.disabled = false;
+            btn.disabled = false;
+            btn.textContent = 'Generate';
+          };
+        } else if(data.status === 'error'){
+          setStatus('', 'Error');
+          loadingText.textContent = data.message || 'Something went wrong';
+          setTimeout(() => { overlay.classList.remove('active'); }, 1800);
+          btn.disabled = false;
+          btn.textContent = 'Generate';
+        }
+      };
+
+      ws.send(JSON.stringify({ prompt }));
+
+    }catch(err){
+      // Fallback: hit Pollinations directly if backend/WS unavailable
+      console.warn('WS unavailable, using direct fallback:', err);
+      loadingText.textContent = 'Generating world…';
+      const seed = Math.floor(Math.random()*100000);
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', cinematic, highly detailed, digital art')}?width=768&height=576&seed=${seed}&nologo=true`;
+      resultImg.src = url;
+      resultImg.onload = () => {
+        resultImg.style.display = 'block';
+        overlay.classList.remove('active');
+        currentImageUrl = url;
+        downloadBtn.disabled = false;
+        setStatus('ready', 'Ready (direct)');
+        btn.disabled = false;
+        btn.textContent = 'Generate';
+      };
+      resultImg.onerror = () => {
+        loadingText.textContent = 'Generation failed. Try again.';
+        setTimeout(()=>overlay.classList.remove('active'), 1800);
+        btn.disabled = false;
+        btn.textContent = 'Generate';
+      };
     }
-});
+  }
+
+  async function downloadImage(){
+    if(!currentImageUrl) return;
+    try{
+      const response = await fetch(currentImageUrl, { mode: 'cors' });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `synthetica-world-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }catch(e){
+      window.open(currentImageUrl, '_blank');
+    }
+  }
+
+  // Attempt initial connection in background (non-blocking)
+  connectWS().catch(() => setStatus('', 'Idle'));
 </script>
 
 </body>
